@@ -320,7 +320,7 @@
         
     </script>
     //按这个格式来添加
-    <script src="03_Answer management_function.js">
+    <script src="03_Question management_function.js">
         function addNewQuestion() {
             const subject = dom.questionSubject.value;
             const type = dom.questionType.value;
