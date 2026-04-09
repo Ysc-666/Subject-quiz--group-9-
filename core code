@@ -271,7 +271,7 @@
                 document.getElementById('no-questions-msg').style.display="none";
             }
         }
-        let quizAppData = {};
+       
 //Global variable to store subject/question data. Shared across all modules for data consistency (modular data sharing)
         function initData() {}
         function saveData(data){}
@@ -319,8 +319,151 @@
         
         
     </script>
-    //按这个格式来添加
-    <script src="03_Question management_function.js">
+    <script src="Subject_management_function.js">
+        function initData() {
+            const storedData = localStorage.getItem('quizAppData');
+            if (!storedData) {
+                const defaultData = { subjects: [], questions: {} };
+                localStorage.setItem('quizAppData', JSON.stringify(defaultData));
+                return defaultData;
+            }
+            return JSON.parse(storedData);
+        }
+
+        function saveData(data) {
+            localStorage.setItem('quizAppData', JSON.stringify(data));
+        }
+
+        function validateSubjectName(subjectName) {
+            if (!subjectName.trim()) {
+            return { valid: false, message: "Please enter a subject name!", color: "red" };
+        }
+            if (quizAppData.subjects.includes(subjectName)) {
+            return { valid: false, message: "This subject already exists!", color: "red" };
+        }
+        return { valid: true };
+        }
+
+        function createNewSubject() {
+            const subjectName = document.getElementById('new-subject-name').value;
+            const createMsg = document.getElementById('create-msg');
+  
+            const validation = validateSubjectName(subjectName);
+            if (!validation.valid) {
+                createMsg.textContent = validation.message;
+                createMsg.style.color = validation.color;
+                return;
+            }
+  
+            quizAppData.subjects.push(subjectName);
+            quizAppData.questions[subjectName] = [];
+            saveData(quizAppData);
+  
+            createMsg.textContent = `Subject "${subjectName}" created successfully!`;
+            createMsg.style.color = "green";
+            document.getElementById('new-subject-name').value = "";
+  
+            updateUI();
+        }
+
+        function deleteSubject(subjectName) {
+            if (!confirm(`Are you sure to delete "${subjectName}"? All questions will be deleted!`)) {
+                return false;
+            }
+  
+            quizAppData.subjects = quizAppData.subjects.filter(sub => sub !== subjectName);
+            delete quizAppData.questions[subjectName];
+            saveData(quizAppData);
+  
+            return true;
+        }
+
+        function deleteSubjectDirect(subjectName) {
+            if (deleteSubject(subjectName)) {
+                updateUI();
+            }
+        }
+
+        function deleteSelectedSubject() {
+            const subjectName = document.getElementById('manage-subject').value;
+            if (!subjectName) {
+                alert("Please select a subject to delete!");
+                return;
+            }
+  
+            if (deleteSubject(subjectName)) {
+                alert(`Subject "${subjectName}" deleted!`);
+                updateUI();
+                clearQuestionList();
+            }
+        }
+
+        function updateUI() {
+            renderSubjectList();
+            updateSubjectSelect();
+            updateManageSubjectSelect();
+        }
+
+        function renderSubjectList() {
+            const subjectList = document.getElementById('subject-list');
+            const noSubjectMsg = document.getElementById('no-subject-msg');
+  
+            subjectList.innerHTML = "";
+  
+            if (quizAppData.subjects.length === 0) {
+                noSubjectMsg.style.display = "block";
+                return;
+            }
+  
+            noSubjectMsg.style.display = "none";
+  
+            quizAppData.subjects.forEach(subject => {
+                const subjectCard = createSubjectCard(subject);
+                subjectList.appendChild(subjectCard);
+            });
+        }
+
+        function createSubjectCard(subject) {
+            const subjectCard = document.createElement('div');
+            subjectCard.className = "subject-card";
+            subjectCard.innerHTML = `
+                <span>${subject}</span>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteSubjectDirect('${subject}')">×</button>
+            `;
+            subjectCard.onclick = () => startQuiz(subject);
+            return subjectCard;
+        }
+
+        function updateSubjectSelect() {
+            updateSelect('question-subject', '-- Select a subject --');
+        }
+
+        function updateManageSubjectSelect() {
+            updateSelect('manage-subject', '-- Select a subject to manage --');
+        }
+
+        function updateSelect(selectId, placeholderText) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">${placeholderText}</option>`;
+  
+            quizAppData.subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                select.appendChild(option);
+            });
+        }
+
+        function clearQuestionList() {
+            document.getElementById('manage-questions-list').innerHTML = "";
+            document.getElementById('no-questions-msg').style.display = "none";
+}
+    </script>
+    <script>
+        let quizAppData = initData();
+            updateUI();
+    </script>
+    <script src="Question_management_function.js">
         function addNewQuestion() {
             const subject = dom.questionSubject.value;
             const type = dom.questionType.value;
