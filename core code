@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8"/>
+    <!--Support all language-->
+    <title>Subject Quiz</title>
+    <style>
+        */*selects all elements on the page*/{
+            margin: 0;
+            padding: 0;
+            /*reset browser margin and padding*/
+            box-sizing: border-box;
+            /* Ensures element width/height includes padding and borders*/
+            font-family: Arial,sans-serif;
+        }
+        body{
+            padding: 20px;
+            max-width: 800px;
+            margin:0 auto;/*centers the body horizongtally*/
+        }
+        .nav{
+            margin-bottom:30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .nav button{
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .nav button:hover/*Pseudo-class*/{
+            background-color: #e0e0e0;
+        }
+        .page/*change the page*/{
+            display: none;
+        }
+        .page.active
+        /*Combined class selector 
+         shows elements with both page and active classes */{
+            display: block
+            ;
+        }
+        #subject-list/*ID selectors
+        target unique elements*/{
+            margin: 20px 0;
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .subject-card{
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color:white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subject-card:hover{
+            background-color: #45a049;
+        }
+        .delete-btn{
+            background-color: #f44336;
+            border: none;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        .delete-btn{
+            background-color: #d32f2f;
+        }
+        .form-group/*target reusable components*/{
+            margin: 15px 0;
+        }
+        .form-group label{
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,.form-group select{
+            width:100%;
+            max-width: 500px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #options-container{
+            margin: 20px 0;
+        }
+        #options-container div{
+            margin: 10px 0;
+        }
+        button.submit-btn{
+            background-color: #2196F3;
+            color: white;
+            border:none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button.submit-btn:hover {
+            background-color: #0b7dda;
+        }
+        #result-page{
+            margin-top: 20px;
+        }
+        .result-stats{
+            font-size: 18px;
+            margin:10px 0;
+        }
+        .wrong-questions-section{
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .wrong-question-item{
+            border:1px solid #ffebee;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius:4px;
+            background-color: #ffebee;
+        }
+        .correct-answer{
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .your-answer{
+            color: #f44336;
+            font-weight: bold;
+        }
+        #manage-question-page{
+            margin-top: 20px;
+        }
+        .question-item{
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin:10px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .question-info{
+            flex: 1;
+        }
+        .question-action{
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <!--trigger the switchPage() function via the onclick event-->
+    <button onclick="switchPage('quiz-home-page')">Homepage（答題主頁）</button>
+    <button onclick="switchPage('create-subject-page')">Create(創建新學科)</button>
+    <button onclick="switchPage('add-question-page')">Add（新增題目）</button>
+    <button onclick="switchPage('manage-questions-page')">Management（管理題目/学科）</button>
+    </div>
+    
+    
+    <div id="quiz-home-page" class="page active">
+        <!--Unique identifier for the quiz home page-->
+        <h1>Subject Fun Quiz</h1>
+        <h3>Select a Subject to Start</h3>
+        <div id="subject-list"></div>
+        <!--Empty container where the subject management module will insert subject cards-->
+        <p id="no-subject-msg" style="color:#666;display:none;">No subject yet! Create a new subject first.</p> 
+    </div>
+    <div id="create-subject-page" class="page">
+        <!--Create Subject page with a form-->
+        <h1>Create New Subject</h1>
+        <div class="form-group">
+            <label for="new-subject-name">Subject Name (e.g. Physics,History):</label>
+            <input type="text" id="new-subject-name" placeholder="Enter subject name">
+            <!--text input component-->
+        </div>
+        <button onclick="createNewSubject()" class="submit-btn">Create Subject</button>
+        <!--Triggers the subject management module's function to create a new subject -->
+        <p id="create-msg" style="margin-top: 15px;"></p>
+    </div>
+    <div id="add-question-page" class="page">
+        <h1>Add New Question</h1>
+        <div class="form-group">
+            <label for="question-subject">Select Subject:</label>
+            <select id="question-subject">
+                <option value="">-- Select a subject --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="question-type">Question Type:</label>
+            <select id="question-type">
+            <!--Dropdown component populated with subjects by the question management module-->
+                <option value="choice">Multiple Choice</option>
+                <option value="judge">True/False</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="question-content">Question Content:</label>
+            <input type="text" id="question-content" placeholder="Enter the question">
+        </div>
+        <div class="form-group">
+            <label for="question-options">Options (split by comma, e.g. A,B,C,D or True,False):</label>
+            <input type="text" id="question-options" placeholder="Enter options separated by commas">
+        </div>
+        <div class="form-group">
+            <label for="question-answer">Correct Answer:</label>
+            <input type="text" id="question-answer" placeholder="Enter the correct answer">
+        </div>
+        <button onclick="addNewQuestion()" class="submit-btn">Add Question</button>
+        <p id="add-msg" style="margin-top: 15px;"></p>
+    </div>
+    <div id="quiz-page" class="page">
+        <h2 id="question-title"></h2>
+        <div id="options-container"></div>
+        <button onclick="submitAnswer()" class="submit-btn">Submit Answer</button>
+        <!--Triggers the quiz module’s function to submit the answer-->
+    </div>
+    <div id="result-page" class="page">
+        <h2>Quiz Result</h2>
+        <p class="result-stats">Correct Answers: <span id="correct-count">0</span>/<span id="totall-count">0</span></p>
+        <p class="result-stats">Accuracy: <span id="accuracy">0</span>%</p>
+        <div class="wrong-question-section">
+            <h3>Wrong Question Review</h3>
+            <div id="wrong-questions-list"></div>
+            <p id="no-wrong-msg" style="color:#666;display:none;">Congratulations! No wrong answers!</p>
+        </div>
+        <button onclick="restartQuiz()" class="submit-btn" style="margin-top: 20px;">Back to Subject List</button>
+    </div>
+    <div id="manage-questions-page" class="page">
+        <h1>Manage Subjects & Questions</h1>
+        <div class="form-group">
+            <h3>1. Manage Subjects</h3>
+            <select id="manage-subject" onchange="loadSubjectQuestions()">
+            <!--Triggers the question management module's function to load questions for the selected subject -->
+                <option value="">-- Select a subject to manage --</option>
+            </select>
+            <button onclick="deleteSubject()" class="delete-btn" style="margin-left:10px;">Delete Selected Subject</button>
+        </div>
+
+        <div class="form-group">
+            <h3>2.Manage Questions (Selected Subject)</h3>
+            <div id="manage-questions-list"></div>
+            <p id="no-questions-msg" style="color:#666; display:none;">No questions in this subject yet!</p>
+        </div>
+    </div>
+    <script>
+        function switchPage(pageId)/*Core function for page switching*/{
+            document.querySelectorAll/*Selects all page elements*/('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            if (pageId === 'quiz-home-page'){
+                /* Fault tolerance check(typeof renderSubjectList) */
+                if(typeof renderSubjectList === 'function') renderSubjectList();
+            }/*Linkage logic: Calls module-specific functions (e.g., renderSubjectList())
+             when switching to a page (modular collaboration) to avoid "function not defined" errors if modules are not integrated*/
+            if (pageId ==='add-question-page'){
+                if (typeof updateSubjectSelect === 'function') updateSubjectSelect();
+            }
+            if (pageId === 'manage-questions-page'){
+                if (typeof updateManageSubjectSelect === 'function') updateManageSubjectSelect();
+                document.getElementById('manage-questions-list').innerHTML = "";
+                document.getElementById('no-questions-msg').style.display="none";
+            }
+        }
+        let quizAppData = {};
+//Global variable to store subject/question data. Shared across all modules for data consistency (modular data sharing)
+        function initData() {}
+        function saveData(data){}
+        function createNewSubject() {}
+        function renderSubjectList() {}
+        function updateSubjectSelect() {}
+        function updateManageSubjectSelect() {}
+        function deleteSubject() {}
+        function deleteSubjectDirect(subjectName) {}
+ //"declare first, call later" principle       
+        function addNewQuestion() {}
+        function loadSubjectQuestions() {}
+        function deleteQuestion(subjectName, questionId) {}
+
+        let currentSubject = "";
+        let currentQuestions = [];
+        let currentQIndex = 0;
+        let correctCount = 0;
+        let answerRecords = [];
+        function startQuiz(subject) {}
+        function showQuestion() {}
+        function submitAnswer() {}
+        function restartQuiz() {}
+
+        function showResult() {}
+//Global variables (e.g., currentSubject, answerRecords) store quiz state for the quiz module
+        
+        window.onload = function(){
+        //Executes after all page elements are loaded.
+            /*Calls initialization functions from other modules to load data,
+             render the subject list, and populate dropdowns*/
+            if (typeof initData ==='function'){
+                quizAppData = initData();
+            }
+            if (typeof updateSubjectList ==='function'){
+                updateSubjectList();
+            }
+            if (typeof renderSubjectSelect === 'function'){
+                renderSubjectSelect();
+            }
+            if(typeof updateManageSubjectSelect === 'function'){
+                updateManageSubjectSelect();
+            }
+        }
+        
+        
+    </script>
+    //按这个格式来添加
+    <script src="03_Answer management_function.js">
+        function addNewQuestion() {
+            const subject = dom.questionSubject.value;
+            const type = dom.questionType.value;
+            const content = dom.questionContent.value.trim();
+            const optionsStr = dom.questionOptions.value.trim();
+            const answer = dom.questionAnswer.value.trim();
+
+            if (!subject || !content || !optionsStr || !answer) {
+                dom.addMsg.textContent = 'Fill all fields!';
+                dom.addMsg.style.color = 'red';
+                return;
+            }
+
+            const options = optionsStr.split(',').map(o => o.trim());
+            if (options.length < 2) {
+                dom.addMsg.textContent = 'At least 2 options!';
+                dom.addMsg.style.color = 'red';
+                return;
+            }
+            if (!options.includes(answer)) {
+                dom.addMsg.textContent = 'Answer not in options!';
+                dom.addMsg.style.color = 'red';
+                return;
+            }
+
+            const q = {
+                id: Date.now(),
+                type,
+                content,
+                options,
+                answer
+            };
+
+            quizAppData.questions[subject].push(q);
+            saveData();
+            dom.addMsg.textContent = 'Added successfully!';
+            dom.addMsg.style.color = 'green';
+            dom.questionContent.value = '';
+            dom.questionOptions.value = '';
+            dom.questionAnswer.value = '';
+        }
+
+        function loadSubjectQuestions() {
+            const subject = dom.manageSubject.value;
+            dom.manageQuestionsList.innerHTML = '';
+            dom.noQuestionsMsg.style.display = 'none';
+            if (!subject) return;
+
+            const qs = quizAppData.questions[subject] || [];
+            if (qs.length === 0) {
+                dom.noQuestionsMsg.style.display = 'block';
+                return;
+            }
+
+            let html = '';
+            qs.forEach(q => {
+                const typeText = q.type === 'choice' ? 'Choice' : 'True/False';
+                html += `
+                <div class="question-item">
+                    <div>
+                        <strong>${typeText}:</strong> ${q.content}<br>
+                        <small>Options: ${q.options.join(', ')} | Answer: ${q.answer}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteQuestion('${subject}', ${q.id})">Delete</button>
+                </div>`;
+            });
+            dom.manageQuestionsList.innerHTML = html;
+        }
+
+        function deleteQuestion(subject, id) {
+            if (!confirm('Delete?')) return;
+            quizAppData.questions[subject] = quizAppData.questions[subject].filter(q => q.id !== id);
+            saveData();
+            loadSubjectQuestions();
+        }
+    </script>
+</body>
+</html>
