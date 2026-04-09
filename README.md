@@ -23,13 +23,6 @@ The project is fully modularized and divided into 6 core pages:
 2. Open `index.html` with any browser (Chrome / Edge / Firefox)
 3. No installation required – the app runs directly in the browser
 
-## 🧩 Modules
-### Module 1 – Basic Template & Page Architecture
-- Builds the entire UI framework
-- Provides 6 independent pages
-- Implements page switching using `switchPage()`
-- Defines global CSS styles and layout
-- Supports modular collaboration with other components
 
 ## 📚 Technical Stack
 - HTML5 (page structure)
@@ -37,15 +30,7 @@ The project is fully modularized and divided into 6 core pages:
 - Vanilla JavaScript (interactive logic)
 - Local Storage (data persistence)
 
-## 📌 Page Switching Core Logic
-All pages are controlled by CSS classes:
-- `.page { display: none; }` (hidden by default)
-- `.page.active { display: block; }` (show current page)
 
-The `switchPage()` function controls navigation between pages.
-
-## 👥 Group Project Contribution
-- **Module 1 (Page Architect)**: Responsible for the entire front-end framework, page structure, navigation, and global style design.
 
 ## 📝 Notes
 - All data is stored locally in your browser
