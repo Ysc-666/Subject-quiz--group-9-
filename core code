@@ -3,21 +3,18 @@
 <head>
 
     <meta charset="utf-8"/>
-    <!--Support all language-->
     <title>Subject Quiz</title>
     <style>
-        */*selects all elements on the page*/{
+        *{
             margin: 0;
             padding: 0;
-            /*reset browser margin and padding*/
             box-sizing: border-box;
-            /* Ensures element width/height includes padding and borders*/
             font-family: Arial,sans-serif;
         }
         body{
             padding: 20px;
             max-width: 800px;
-            margin:0 auto;/*centers the body horizongtally*/
+            margin:0 auto;
         }
         .nav{
             margin-bottom:30px;
@@ -32,20 +29,17 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        .nav button:hover/*Pseudo-class*/{
+        .nav button:hover{
             background-color: #e0e0e0;
         }
-        .page/*change the page*/{
+        .page{
             display: none;
         }
-        .page.active
-        /*Combined class selector 
-         shows elements with both page and active classes */{
+        .page.active{
             display: block
             ;
         }
-        #subject-list/*ID selectors
-        target unique elements*/{
+        #subject-list{
             margin: 20px 0;
             display:flex;
             flex-wrap:wrap;
@@ -77,7 +71,7 @@
         .delete-btn{
             background-color: #d32f2f;
         }
-        .form-group/*target reusable components*/{
+        .form-group{
             margin: 15px 0;
         }
         .form-group label{
@@ -158,7 +152,6 @@
 </head>
 <body>
     <div class="nav">
-        <!--trigger the switchPage() function via the onclick event-->
     <button onclick="switchPage('quiz-home-page')">Homepage（答題主頁）</button>
     <button onclick="switchPage('create-subject-page')">Create(創建新學科)</button>
     <button onclick="switchPage('add-question-page')">Add（新增題目）</button>
@@ -167,23 +160,20 @@
     
     
     <div id="quiz-home-page" class="page active">
-        <!--Unique identifier for the quiz home page-->
+        
         <h1>Subject Fun Quiz</h1>
         <h3>Select a Subject to Start</h3>
         <div id="subject-list"></div>
-        <!--Empty container where the subject management module will insert subject cards-->
+       
         <p id="no-subject-msg" style="color:#666;display:none;">No subject yet! Create a new subject first.</p> 
     </div>
     <div id="create-subject-page" class="page">
-        <!--Create Subject page with a form-->
         <h1>Create New Subject</h1>
         <div class="form-group">
             <label for="new-subject-name">Subject Name (e.g. Physics,History):</label>
             <input type="text" id="new-subject-name" placeholder="Enter subject name">
-            <!--text input component-->
         </div>
         <button onclick="createNewSubject()" class="submit-btn">Create Subject</button>
-        <!--Triggers the subject management module's function to create a new subject -->
         <p id="create-msg" style="margin-top: 15px;"></p>
     </div>
     <div id="add-question-page" class="page">
@@ -197,7 +187,6 @@
         <div class="form-group">
             <label for="question-type">Question Type:</label>
             <select id="question-type">
-            <!--Dropdown component populated with subjects by the question management module-->
                 <option value="choice">Multiple Choice</option>
                 <option value="judge">True/False</option>
             </select>
@@ -221,7 +210,6 @@
         <h2 id="question-title"></h2>
         <div id="options-container"></div>
         <button onclick="submitAnswer()" class="submit-btn">Submit Answer</button>
-        <!--Triggers the quiz module’s function to submit the answer-->
     </div>
     <div id="result-page" class="page">
         <h2>Quiz Result</h2>
@@ -239,7 +227,6 @@
         <div class="form-group">
             <h3>1. Manage Subjects</h3>
             <select id="manage-subject" onchange="loadSubjectQuestions()">
-            <!--Triggers the question management module's function to load questions for the selected subject -->
                 <option value="">-- Select a subject to manage --</option>
             </select>
             <button onclick="deleteSubject()" class="delete-btn" style="margin-left:10px;">Delete Selected Subject</button>
@@ -252,16 +239,44 @@
         </div>
     </div>
     <script>
-        function switchPage(pageId)/*Core function for page switching*/{
-            document.querySelectorAll/*Selects all page elements*/('.page').forEach(page => {
+        const dom = {
+            subjectList: document.getElementById('subject-list'),
+            noSubjectMsg: document.getElementById('no-subject-msg'),
+            newSubjectName: document.getElementById('new-subject-name'),
+            createMsg: document.getElementById('create-msg'),
+            questionSubject: document.getElementById('question-subject'),
+            questionType: document.getElementById('question-type'),
+            questionContent: document.getElementById('question-content'),
+            questionOptions: document.getElementById('question-options'),
+            questionAnswer: document.getElementById('question-answer'),
+            addMsg: document.getElementById('add-msg'),
+            manageSubject: document.getElementById('manage-subject'),
+            manageQuestionsList: document.getElementById('manage-questions-list'),
+            noQuestionsMsg: document.getElementById('no-questions-msg'),
+            questionTitle: document.getElementById('question-title'),
+            optionsContainer: document.getElementById('options-container'),
+            correctCount: document.getElementById('correct-count'),
+            totalCount: document.getElementById('total-count'),
+            accuracy: document.getElementById('accuracy'),
+            wrongQuestionsList: document.getElementById('wrong-questions-list'),
+            noWrongMsg: document.getElementById('no-wrong-msg')
+        };
+        let quizAppData = initData();
+
+        let currentSubject = "";
+        let currentQuestions = [];
+        let currentQIndex = 0;
+        let correctCount = 0;
+        let answerRecords = [];
+        function switchPage(pageId){
+            document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
             document.getElementById(pageId).classList.add('active');
             if (pageId === 'quiz-home-page'){
-                /* Fault tolerance check(typeof renderSubjectList) */
+                
                 if(typeof renderSubjectList === 'function') renderSubjectList();
-            }/*Linkage logic: Calls module-specific functions (e.g., renderSubjectList())
-             when switching to a page (modular collaboration) to avoid "function not defined" errors if modules are not integrated*/
+            }
             if (pageId ==='add-question-page'){
                 if (typeof updateSubjectSelect === 'function') updateSubjectSelect();
             }
@@ -272,37 +287,38 @@
             }
         }
        
-//Global variable to store subject/question data. Shared across all modules for data consistency (modular data sharing)
-        function initData() {}
-        function saveData(data){}
+        function initData() {
+            const stored = localStorage.getItem('quizAppData');
+            if (!stored) {
+                const def = { subjects: [], questions: {} };
+                localStorage.setItem('quizAppData', JSON.stringify(def));
+                return def;
+            }
+            return JSON.parse(stored);
+        }
+        function saveData(data = quizAppData) {
+            localStorage.setItem('quizAppData', JSON.stringify(data));
+        }
+
+        
         function createNewSubject() {}
         function renderSubjectList() {}
         function updateSubjectSelect() {}
         function updateManageSubjectSelect() {}
         function deleteSubject() {}
-        function deleteSubjectDirect(subjectName) {}
- //"declare first, call later" principle       
+        function deleteSubjectDirect(subjectName) {}   
         function addNewQuestion() {}
         function loadSubjectQuestions() {}
         function deleteQuestion(subjectName, questionId) {}
-
-        let currentSubject = "";
-        let currentQuestions = [];
-        let currentQIndex = 0;
-        let correctCount = 0;
-        let answerRecords = [];
         function startQuiz(subject) {}
         function showQuestion() {}
         function submitAnswer() {}
         function restartQuiz() {}
 
         function showResult() {}
-//Global variables (e.g., currentSubject, answerRecords) store quiz state for the quiz module
         
         window.onload = function(){
-        //Executes after all page elements are loaded.
-            /*Calls initialization functions from other modules to load data,
-             render the subject list, and populate dropdowns*/
+       
             if (typeof initData ==='function'){
                 quizAppData = initData();
             }
@@ -315,19 +331,6 @@
             if(typeof updateManageSubjectSelect === 'function'){
                 updateManageSubjectSelect();
             }
-        }
-        
-        
-    </script>
-    <script src="Subject_management_function.js">
-        function initData() {
-            const storedData = localStorage.getItem('quizAppData');
-            if (!storedData) {
-                const defaultData = { subjects: [], questions: {} };
-                localStorage.setItem('quizAppData', JSON.stringify(defaultData));
-                return defaultData;
-            }
-            return JSON.parse(storedData);
         }
 
         function saveData(data) {
@@ -457,13 +460,8 @@
         function clearQuestionList() {
             document.getElementById('manage-questions-list').innerHTML = "";
             document.getElementById('no-questions-msg').style.display = "none";
-}
-    </script>
-    <script>
-        let quizAppData = initData();
-            updateUI();
-    </script>
-    <script src="Question_management_function.js">
+        }
+    
         function addNewQuestion() {
             const subject = dom.questionSubject.value;
             const type = dom.questionType.value;
@@ -538,6 +536,46 @@
             quizAppData.questions[subject] = quizAppData.questions[subject].filter(q => q.id !== id);
             saveData();
             loadSubjectQuestions();
+        }
+        function showResult() {
+            const total = currentQuestions.length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('accuracy').textContent = accuracy;
+
+            const wrongQuestionsList = document.getElementById('wrong-questions-list');
+            const noWrongMsg = document.getElementById('no-wrong-msg');
+            wrongQuestionsList.innerHTML = "";
+
+            const wrongQuestions = answerRecords.filter(record => !record.isCorrect);
+  
+            if (wrongQuestions.length === 0) {
+                noWrongMsg.style.display = "block";
+            } else {
+                noWrongMsg.style.display = "none";
+                wrongQuestions.forEach((record, index) => {
+                    const wrongItem = document.createElement('div');
+                    wrongItem.className = "wrong-question-item";
+                    wrongItem.innerHTML = `
+                        <h4>Wrong Question ${index + 1}</h4>
+                        <p><strong>Question:</strong> ${record.question.content}</p>
+                        <p><strong>Your Answer:</strong> <span class="your-answer">${record.yourAnswer}</span></p>
+                        <p><strong>Correct Answer:</strong> <span class="correct-answer">${record.question.answer}</span></p>
+                    `;
+                    wrongQuestionsList.appendChild(wrongItem);
+                });
+            }
+
+            document.getElementById('quiz-page').classList.remove('active');
+            document.getElementById('result-page').classList.add('active');
+        }
+
+        window.onload = function(){
+            quizAppData = initData();
+            updateUI();
+            switchPage('quiz-home-page')
         }
     </script>
 </body>
